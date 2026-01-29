@@ -247,7 +247,7 @@ function App() {
   }, [generatedImages]);
 
   return (
-    <div className="min-h-screen bg-background text-black dark:text-foreground transition-colors duration-300">
+    <div className="min-h-screen flex flex-col bg-background text-black dark:text-foreground transition-colors duration-300">
       {/* Header */}
       <header className="bg-card border-b border-border shadow-sm sticky top-0 z-10 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
@@ -269,7 +269,7 @@ function App() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 py-8">
+      <main className="flex-1 w-full max-w-7xl mx-auto px-4 py-8">
         {/* Template Section */}
         <div className="bg-card text-card-foreground rounded-2xl shadow-lg border border-border p-6 mb-8 transition-all hover:shadow-xl">
           <div className="flex items-center justify-between mb-4">
@@ -400,6 +400,40 @@ function App() {
         {/* Hidden preview container */}
         <div ref={previewRef} className="hidden" />
       </main>
+
+      {/* Footer */}
+      <footer className="w-full py-8 border-t border-border bg-card shadow-inner mt-auto transition-colors duration-300">
+        <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="text-center md:text-left">
+            <p className="text-sm font-bold text-black dark:text-gray-300">
+              Criado por Saulo Teixeira 2026
+            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-500">
+              © Todos os direitos reservados
+            </p>
+          </div>
+
+          <a
+            href="https://www.linkedin.com/in/sauloteixeira-dev"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 dark:text-blue-400 hover:scale-110 hover:text-blue-700 dark:hover:text-blue-300 transition-all duration-200"
+            title="LinkedIn"
+            aria-label="Visite meu LinkedIn"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="32"
+              height="32"
+              fill="currentColor"
+              viewBox="0 0 16 16"
+              className="drop-shadow-sm"
+            >
+              <path d="M0 1.146C0 .513.526 0 1.175 0h13.65C15.474 0 16 .513 16 1.146v13.708c0 .633-.526 1.146-1.175 1.146H1.175C.526 16 0 15.487 0 14.854V1.146zm4.943 12.248V6.169H2.542v7.225h2.401zm-1.2-8.212c.837 0 1.358-.554 1.358-1.248-.015-.709-.52-1.248-1.342-1.248-.822 0-1.359.54-1.359 1.248 0 .694.521 1.248 1.327 1.248h.016zm4.908 8.212V9.359c0-.216.016-.432.08-.586.173-.431.568-.878 1.232-.878.869 0 1.216.662 1.216 1.634v3.865h2.401V9.25c0-2.22-1.184-3.252-2.764-3.252-1.274 0-1.845.7-2.165 1.193v.025h-.016a5.54 5.54 0 0 1 .016-.025V6.169h-2.4c.03.678 0 7.225 0 7.225h2.4z" />
+            </svg>
+          </a>
+        </div>
+      </footer>
     </div>
   );
 }
