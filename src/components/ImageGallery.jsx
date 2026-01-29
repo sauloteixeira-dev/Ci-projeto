@@ -9,12 +9,12 @@ export default function ImageGallery({ images, onDownloadAll }) {
     return (
         <div className="mt-8">
             <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold text-gray-800">
+                <h2 className="text-xl font-bold text-foreground">
                     📄 CIs Geradas ({images.length})
                 </h2>
                 <button
                     onClick={onDownloadAll}
-                    className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+                    className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium shadow-md hover:shadow-lg"
                 >
                     📥 Baixar Todas (ZIP)
                 </button>
@@ -24,10 +24,10 @@ export default function ImageGallery({ images, onDownloadAll }) {
                 {images.map((image, index) => (
                     <div
                         key={index}
-                        className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200"
+                        className="bg-card text-card-foreground rounded-xl shadow-lg overflow-hidden border border-border transition-all hover:shadow-xl"
                     >
-                        <div className="p-3 bg-gray-50 border-b">
-                            <p className="text-sm font-medium text-gray-700 truncate">
+                        <div className="p-3 bg-muted/30 border-b border-border">
+                            <p className="text-sm font-medium text-foreground truncate">
                                 {image.name}.png
                             </p>
                         </div>
@@ -35,7 +35,7 @@ export default function ImageGallery({ images, onDownloadAll }) {
                             <img
                                 src={image.url}
                                 alt={`CI para ${image.name}`}
-                                className="w-full h-auto rounded border"
+                                className="w-full h-auto rounded border border-border"
                             />
                         </div>
                     </div>

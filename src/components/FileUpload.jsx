@@ -25,10 +25,10 @@ export default function FileUpload({
 
     return (
         <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium text-gray-700">{label}</label>
+            <label className="text-sm font-bold text-black dark:text-foreground">{label}</label>
             <div
                 onClick={handleClick}
-                className="relative flex items-center justify-center gap-3 px-6 py-4 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-all duration-200"
+                className="relative flex items-center justify-center gap-3 px-6 py-4 border-2 border-dashed border-gray-400 dark:border-input rounded-xl cursor-pointer hover:border-primary hover:bg-accent hover:text-accent-foreground transition-all duration-200"
             >
                 <input
                     ref={inputRef}
@@ -39,10 +39,10 @@ export default function FileUpload({
                 />
                 <span className="text-2xl">{icon}</span>
                 <div className="flex flex-col">
-                    <span className="text-sm font-medium text-gray-600">
+                    <span className="text-sm font-bold text-black dark:text-foreground">
                         {fileName || 'Clique para selecionar'}
                     </span>
-                    <span className="text-xs text-gray-400">
+                    <span className="text-xs text-gray-600 dark:text-muted-foreground">
                         {accept}
                     </span>
                 </div>

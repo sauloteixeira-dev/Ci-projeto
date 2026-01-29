@@ -1,1 +1,8 @@
 /* App specific styles */
+.status-text-success {
+  color: black !important;
+}
+
+.dark .status-text-success {
+  color: #86efac !important;
+}

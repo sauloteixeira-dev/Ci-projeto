@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import FileUpload from './components/FileUpload';
 import ImageGallery from './components/ImageGallery';
 import { readExcelFile, validateExcelData } from './utils/excelReader';
@@ -24,6 +24,8 @@ LARISSA ALVES DA SILVA VILELA
 Secretária Municipal de Assistência Social`;
 
 function App() {
+  const [theme, setTheme] = useState('light');
+
   const [template, setTemplate] = useState(() => {
     const saved = localStorage.getItem('letterTemplate');
     return saved || DEFAULT_TEMPLATE;
@@ -37,6 +39,18 @@ function App() {
   const [savedMessage, setSavedMessage] = useState(false);
 
   const previewRef = useRef(null);
+
+  // Aplicar tema
+  useEffect(() => {
+    const root = window.document.documentElement;
+    root.classList.remove('light', 'dark');
+    root.classList.add(theme);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'light' ? 'dark' : 'light');
+  };
 
   // Salvar modelo no localStorage
   const handleSaveTemplate = () => {
@@ -233,59 +247,68 @@ function App() {
   }, [generatedImages]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+    <div className="min-h-screen bg-background text-black dark:text-foreground transition-colors duration-300">
       {/* Header */}
-      <header className="bg-white/10 backdrop-blur-sm border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-4 py-6">
-          <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-            📝 Gerador de CI
-          </h1>
-          <p className="text-slate-300 mt-1">
-            Gere CI automaticamente a partir de um modelo de texto e dados do Excel
-          </p>
+      <header className="bg-card border-b border-border shadow-sm sticky top-0 z-10 transition-colors duration-300">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold flex items-center gap-3 text-black dark:text-foreground">
+              📝 Gerador de CI
+            </h1>
+            <p className="text-black dark:text-muted-foreground text-sm mt-1">
+              Gere documentos oficiais com layout padronizado
+            </p>
+          </div>
+          <button
+            onClick={toggleTheme}
+            className="p-3 rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-all shadow-sm"
+            aria-label="Alternar tema"
+          >
+            {theme === 'light' ? '🌙' : '☀️'}
+          </button>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-8">
         {/* Template Section */}
-        <div className="bg-white rounded-2xl shadow-xl p-6 mb-6">
+        <div className="bg-card text-card-foreground rounded-2xl shadow-lg border border-border p-6 mb-8 transition-all hover:shadow-xl">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-gray-800">
+            <h2 className="text-xl font-bold flex items-center gap-2 text-black dark:text-foreground">
               📄 Modelo da CI
             </h2>
             <div className="flex items-center gap-3">
               {savedMessage && (
-                <span className="text-green-600 text-sm font-medium">
-                  ✅ Modelo salvo!
+                <span className="text-black dark:text-green-400 text-sm font-medium animate-pulse">
+                  ✅ Salvo!
                 </span>
               )}
               <button
                 onClick={handleSaveTemplate}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors text-sm font-medium shadow-md"
               >
-                💾 Salvar Modelo
+                💾 Salvar
               </button>
             </div>
           </div>
 
-          <p className="text-sm text-gray-500 mb-3">
-            Use os placeholders: <code className="bg-gray-100 px-1 rounded">{'<<NUMERO>>'}</code>,
-            <code className="bg-gray-100 px-1 rounded ml-1">{'<<NOME COMPLETO>>'}</code>,
-            <code className="bg-gray-100 px-1 rounded ml-1">{'<<DATA1>>'}</code>,
-            <code className="bg-gray-100 px-1 rounded ml-1">{'<<DATA2>>'}</code>
+          <p className="text-sm text-black dark:text-muted-foreground mb-3">
+            Variáveis disponíveis: <code className="bg-gray-100 dark:bg-muted px-1 rounded border border-gray-300 dark:border-border text-black dark:text-foreground">{'<<NUMERO>>'}</code>,
+            <code className="bg-gray-100 dark:bg-muted px-1 rounded ml-1 border border-gray-300 dark:border-border text-black dark:text-foreground">{'<<NOME COMPLETO>>'}</code>,
+            <code className="bg-gray-100 dark:bg-muted px-1 rounded ml-1 border border-gray-300 dark:border-border text-black dark:text-foreground">{'<<DATA1>>'}</code>,
+            <code className="bg-gray-100 dark:bg-muted px-1 rounded ml-1 border border-gray-300 dark:border-border text-black dark:text-foreground">{'<<DATA2>>'}</code>
           </p>
 
           <textarea
             value={template}
             onChange={(e) => setTemplate(e.target.value)}
-            className="w-full h-80 p-4 border-2 border-gray-200 rounded-xl font-mono text-sm focus:border-blue-500 focus:outline-none resize-none"
+            className="w-full h-80 p-4 bg-background text-black dark:text-foreground border-2 border-border rounded-xl font-mono text-sm focus:border-ring focus:ring-2 focus:ring-ring/20 focus:outline-none resize-none transition-all"
             placeholder="Digite o modelo da CI aqui..."
           />
         </div>
 
         {/* Excel Upload Section */}
-        <div className="bg-white rounded-2xl shadow-xl p-6 mb-6">
-          <h2 className="text-xl font-bold text-gray-800 mb-4">
+        <div className="bg-card text-card-foreground rounded-2xl shadow-lg border border-border p-6 mb-8 transition-all hover:shadow-xl">
+          <h2 className="text-xl font-bold mb-4 flex items-center gap-2 text-black dark:text-foreground">
             📊 Dados do Excel
           </h2>
 
@@ -298,16 +321,16 @@ function App() {
           />
 
           {excelData.length > 0 && (
-            <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-              <p className="text-green-700 text-sm">
-                ✅ {excelData.length} registros encontrados no Excel
+            <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+              <p className="status-text-success text-sm font-medium">
+                ✅ {excelData.length} registros encontrados
               </p>
             </div>
           )}
 
           {error && (
-            <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-red-700 text-sm whitespace-pre-line">
+            <div className="mt-4 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+              <p className="text-destructive text-sm whitespace-pre-line font-medium">
                 ❌ {error}
               </p>
             </div>
@@ -315,23 +338,23 @@ function App() {
         </div>
 
         {/* Action Button */}
-        <div className="flex justify-center mb-6">
+        <div className="flex justify-center mb-8">
           <button
             onClick={handleGenerate}
             disabled={isProcessing || !template || excelData.length === 0}
             className={`
-              px-8 py-4 rounded-xl font-bold text-lg
-              flex items-center gap-3 transition-all duration-200
+              px-10 py-5 rounded-2xl font-bold text-lg
+              flex items-center gap-3 transition-all duration-300
               ${isProcessing || !template || excelData.length === 0
-                ? 'bg-gray-400 cursor-not-allowed text-gray-200'
-                : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5'
+                ? 'bg-muted text-muted-foreground cursor-not-allowed border border-border'
+                : 'bg-primary text-primary-foreground shadow-lg shadow-primary/20 hover:scale-105 hover:shadow-xl hover:shadow-primary/30 active:scale-95'
               }
             `}
           >
             {isProcessing ? (
               <>
                 <span className="animate-spin">⏳</span>
-                Gerando... ({progress.current}/{progress.total})
+                Processando... ({progress.current}/{progress.total})
               </>
             ) : (
               <>
@@ -343,16 +366,16 @@ function App() {
 
         {/* Progress Bar */}
         {isProcessing && (
-          <div className="bg-white rounded-xl shadow-lg p-4 mb-6">
+          <div className="bg-card border border-border rounded-xl shadow-lg p-4 mb-8 animate-in fade-in slide-in-from-bottom-4">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-gray-700">Progresso</span>
-              <span className="text-sm text-gray-500">
+              <span className="text-sm font-medium">Progresso</span>
+              <span className="text-sm text-muted-foreground">
                 {progress.current} de {progress.total}
               </span>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-3">
+            <div className="w-full bg-secondary rounded-full h-3 overflow-hidden">
               <div
-                className="bg-gradient-to-r from-blue-500 to-indigo-500 h-3 rounded-full transition-all duration-300"
+                className="bg-primary h-3 rounded-full transition-all duration-500 ease-out"
                 style={{ width: `${(progress.current / progress.total) * 100}%` }}
               />
             </div>
@@ -360,16 +383,16 @@ function App() {
         )}
 
         {/* Image Gallery */}
-        <div className="bg-white rounded-2xl shadow-xl p-6">
+        <div className="bg-card text-card-foreground rounded-2xl shadow-lg border border-border p-6 transition-all hover:shadow-xl">
           <ImageGallery
             images={generatedImages}
             onDownloadAll={handleDownloadAll}
           />
 
           {generatedImages.length === 0 && !isProcessing && (
-            <div className="text-center py-12 text-gray-400">
-              <p className="text-5xl mb-4">📋</p>
-              <p>As CIs geradas aparecerão aqui</p>
+            <div className="text-center py-16 text-muted-foreground">
+              <div className="text-6xl mb-4 opacity-20">📋</div>
+              <p className="text-lg">As CIs geradas aparecerão aqui</p>
             </div>
           )}
         </div>
