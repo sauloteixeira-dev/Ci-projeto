@@ -43,7 +43,7 @@ export async function downloadImagesAsZip(images) {
         mimeType: 'application/zip'
     });
 
-    saveAs(content, 'cartas-geradas.zip');
+    saveAs(content, 'cis-geradas.zip');
 }
 
 /**

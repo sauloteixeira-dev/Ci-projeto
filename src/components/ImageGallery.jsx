@@ -10,7 +10,7 @@ export default function ImageGallery({ images, onDownloadAll }) {
         <div className="mt-8">
             <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold text-gray-800">
-                    📄 Cartas Geradas ({images.length})
+                    📄 CIs Geradas ({images.length})
                 </h2>
                 <button
                     onClick={onDownloadAll}
@@ -34,7 +34,7 @@ export default function ImageGallery({ images, onDownloadAll }) {
                         <div className="p-2">
                             <img
                                 src={image.url}
-                                alt={`Carta para ${image.name}`}
+                                alt={`CI para ${image.name}`}
                                 className="w-full h-auto rounded border"
                             />
                         </div>

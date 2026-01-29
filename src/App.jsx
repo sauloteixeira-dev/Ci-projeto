@@ -213,8 +213,8 @@ function App() {
 
       setGeneratedImages(images);
     } catch (err) {
-      console.error('Erro ao gerar cartas:', err);
-      setError('Erro ao gerar cartas: ' + err.message);
+      console.error('Erro ao gerar CIs:', err);
+      setError('Erro ao gerar CIs: ' + err.message);
     } finally {
       setIsProcessing(false);
     }
@@ -279,7 +279,7 @@ function App() {
             value={template}
             onChange={(e) => setTemplate(e.target.value)}
             className="w-full h-80 p-4 border-2 border-gray-200 rounded-xl font-mono text-sm focus:border-blue-500 focus:outline-none resize-none"
-            placeholder="Digite o modelo da carta aqui..."
+            placeholder="Digite o modelo da CI aqui..."
           />
         </div>
 
@@ -335,7 +335,7 @@ function App() {
               </>
             ) : (
               <>
-                🚀 Gerar Cartas
+                🚀 Gerar CIs
               </>
             )}
           </button>
@@ -369,7 +369,7 @@ function App() {
           {generatedImages.length === 0 && !isProcessing && (
             <div className="text-center py-12 text-gray-400">
               <p className="text-5xl mb-4">📋</p>
-              <p>As cartas geradas aparecerão aqui</p>
+              <p>As CIs geradas aparecerão aqui</p>
             </div>
           )}
         </div>
