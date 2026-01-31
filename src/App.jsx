@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import FileUpload from './components/FileUpload';
 import ImageGallery from './components/ImageGallery';
+import DateProcessor from './components/DateProcessor';
 import { readExcelFile, validateExcelData } from './utils/excelReader';
 import { htmlToImage, downloadImagesAsZip } from './utils/imageGenerator';
 import logoImg from './assets/logo.png';
@@ -25,6 +26,7 @@ Secretária Municipal de Assistência Social`;
 
 function App() {
   const [theme, setTheme] = useState('light');
+  const [activeTab, setActiveTab] = useState('gerador'); // 'gerador' ou 'datas'
 
   const [template, setTemplate] = useState(() => {
     const saved = localStorage.getItem('letterTemplate');
@@ -270,135 +272,173 @@ function App() {
       </header>
 
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 py-8">
-        {/* Template Section */}
-        <div className="bg-card text-card-foreground rounded-2xl shadow-lg border border-border p-6 mb-8 transition-all hover:shadow-xl">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold flex items-center gap-2 text-black dark:text-foreground">
-              📄 Modelo da CI
-            </h2>
-            <div className="flex items-center gap-3">
-              {savedMessage && (
-                <span className="text-black dark:text-green-400 text-sm font-medium animate-pulse">
-                  ✅ Salvo!
-                </span>
-              )}
-              <button
-                onClick={handleSaveTemplate}
-                className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors text-sm font-medium shadow-md"
-              >
-                💾 Salvar
-              </button>
-            </div>
-          </div>
-
-          <p className="text-sm text-black dark:text-muted-foreground mb-3">
-            Variáveis disponíveis: <code className="bg-gray-100 dark:bg-muted px-1 rounded border border-gray-300 dark:border-border text-black dark:text-foreground">{'<<NUMERO>>'}</code>,
-            <code className="bg-gray-100 dark:bg-muted px-1 rounded ml-1 border border-gray-300 dark:border-border text-black dark:text-foreground">{'<<NOME COMPLETO>>'}</code>,
-            <code className="bg-gray-100 dark:bg-muted px-1 rounded ml-1 border border-gray-300 dark:border-border text-black dark:text-foreground">{'<<DATA1>>'}</code>,
-            <code className="bg-gray-100 dark:bg-muted px-1 rounded ml-1 border border-gray-300 dark:border-border text-black dark:text-foreground">{'<<DATA2>>'}</code>
-          </p>
-
-          <textarea
-            value={template}
-            onChange={(e) => setTemplate(e.target.value)}
-            className="w-full h-80 p-4 bg-background text-black dark:text-foreground border-2 border-border rounded-xl font-mono text-sm focus:border-ring focus:ring-2 focus:ring-ring/20 focus:outline-none resize-none transition-all"
-            placeholder="Digite o modelo da CI aqui..."
-          />
-        </div>
-
-        {/* Excel Upload Section */}
-        <div className="bg-card text-card-foreground rounded-2xl shadow-lg border border-border p-6 mb-8 transition-all hover:shadow-xl">
-          <h2 className="text-xl font-bold mb-4 flex items-center gap-2 text-black dark:text-foreground">
-            📊 Dados do Excel
-          </h2>
-
-          <FileUpload
-            label="Planilha Excel"
-            accept=".xlsx,.xls"
-            onFileSelect={handleExcelSelect}
-            fileName={excelFile?.name}
-            icon="📊"
-          />
-
-          {excelData.length > 0 && (
-            <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-              <p className="status-text-success text-sm font-medium">
-                ✅ {excelData.length} registros encontrados
-              </p>
-            </div>
-          )}
-
-          {error && (
-            <div className="mt-4 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
-              <p className="text-destructive text-sm whitespace-pre-line font-medium">
-                ❌ {error}
-              </p>
-            </div>
-          )}
-        </div>
-
-        {/* Action Button */}
-        <div className="flex justify-center mb-8">
+        {/* Tabs Navigation */}
+        <div className="flex gap-2 mb-8">
           <button
-            onClick={handleGenerate}
-            disabled={isProcessing || !template || excelData.length === 0}
+            onClick={() => setActiveTab('gerador')}
             className={`
-              px-10 py-5 rounded-2xl font-bold text-lg
-              flex items-center gap-3 transition-all duration-300
-              ${isProcessing || !template || excelData.length === 0
-                ? 'bg-muted text-muted-foreground cursor-not-allowed border border-border'
-                : 'bg-primary text-primary-foreground shadow-lg shadow-primary/20 hover:scale-105 hover:shadow-xl hover:shadow-primary/30 active:scale-95'
+              px-6 py-3 rounded-xl font-bold text-lg flex items-center gap-2 transition-all duration-300
+              ${activeTab === 'gerador'
+                ? 'bg-primary text-primary-foreground shadow-lg'
+                : 'bg-card text-black dark:text-foreground border border-border hover:bg-secondary'
               }
             `}
           >
-            {isProcessing ? (
-              <>
-                <span className="animate-spin">⏳</span>
-                Processando... ({progress.current}/{progress.total})
-              </>
-            ) : (
-              <>
-                🚀 Gerar CIs
-              </>
-            )}
+            📝 Gerador de CI
+          </button>
+          <button
+            onClick={() => setActiveTab('datas')}
+            className={`
+              px-6 py-3 rounded-xl font-bold text-lg flex items-center gap-2 transition-all duration-300
+              ${activeTab === 'datas'
+                ? 'bg-primary text-primary-foreground shadow-lg'
+                : 'bg-card text-black dark:text-foreground border border-border hover:bg-secondary'
+              }
+            `}
+          >
+            📅 Atualizar Datas
           </button>
         </div>
 
-        {/* Progress Bar */}
-        {isProcessing && (
-          <div className="bg-card border border-border rounded-xl shadow-lg p-4 mb-8 animate-in fade-in slide-in-from-bottom-4">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium">Progresso</span>
-              <span className="text-sm text-muted-foreground">
-                {progress.current} de {progress.total}
-              </span>
-            </div>
-            <div className="w-full bg-secondary rounded-full h-3 overflow-hidden">
-              <div
-                className="bg-primary h-3 rounded-full transition-all duration-500 ease-out"
-                style={{ width: `${(progress.current / progress.total) * 100}%` }}
+        {/* Tab Content: Gerador de CI */}
+        {activeTab === 'gerador' && (
+          <>
+            {/* Template Section */}
+            <div className="bg-card text-card-foreground rounded-2xl shadow-lg border border-border p-6 mb-8 transition-all hover:shadow-xl">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold flex items-center gap-2 text-black dark:text-foreground">
+                  📄 Modelo da CI
+                </h2>
+                <div className="flex items-center gap-3">
+                  {savedMessage && (
+                    <span className="text-black dark:text-green-400 text-sm font-medium animate-pulse">
+                      ✅ Salvo!
+                    </span>
+                  )}
+                  <button
+                    onClick={handleSaveTemplate}
+                    className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors text-sm font-medium shadow-md"
+                  >
+                    💾 Salvar
+                  </button>
+                </div>
+              </div>
+
+              <p className="text-sm text-black dark:text-muted-foreground mb-3">
+                Variáveis disponíveis: <code className="bg-gray-100 dark:bg-muted px-1 rounded border border-gray-300 dark:border-border text-black dark:text-foreground">{'<<NUMERO>>'}</code>,
+                <code className="bg-gray-100 dark:bg-muted px-1 rounded ml-1 border border-gray-300 dark:border-border text-black dark:text-foreground">{'<<NOME COMPLETO>>'}</code>,
+                <code className="bg-gray-100 dark:bg-muted px-1 rounded ml-1 border border-gray-300 dark:border-border text-black dark:text-foreground">{'<<DATA1>>'}</code>,
+                <code className="bg-gray-100 dark:bg-muted px-1 rounded ml-1 border border-gray-300 dark:border-border text-black dark:text-foreground">{'<<DATA2>>'}</code>
+              </p>
+
+              <textarea
+                value={template}
+                onChange={(e) => setTemplate(e.target.value)}
+                className="w-full h-80 p-4 bg-background text-black dark:text-foreground border-2 border-border rounded-xl font-mono text-sm focus:border-ring focus:ring-2 focus:ring-ring/20 focus:outline-none resize-none transition-all"
+                placeholder="Digite o modelo da CI aqui..."
               />
             </div>
-          </div>
+
+            {/* Excel Upload Section */}
+            <div className="bg-card text-card-foreground rounded-2xl shadow-lg border border-border p-6 mb-8 transition-all hover:shadow-xl">
+              <h2 className="text-xl font-bold mb-4 flex items-center gap-2 text-black dark:text-foreground">
+                📊 Dados do Excel
+              </h2>
+
+              <FileUpload
+                label="Planilha Excel"
+                accept=".xlsx,.xls"
+                onFileSelect={handleExcelSelect}
+                fileName={excelFile?.name}
+                icon="📊"
+              />
+
+              {excelData.length > 0 && (
+                <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                  <p className="status-text-success text-sm font-medium">
+                    ✅ {excelData.length} registros encontrados
+                  </p>
+                </div>
+              )}
+
+              {error && (
+                <div className="mt-4 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+                  <p className="text-destructive text-sm whitespace-pre-line font-medium">
+                    ❌ {error}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Action Button */}
+            <div className="flex justify-center mb-8">
+              <button
+                onClick={handleGenerate}
+                disabled={isProcessing || !template || excelData.length === 0}
+                className={`
+              px-10 py-5 rounded-2xl font-bold text-lg
+              flex items-center gap-3 transition-all duration-300
+              ${isProcessing || !template || excelData.length === 0
+                    ? 'bg-muted text-muted-foreground cursor-not-allowed border border-border'
+                    : 'bg-primary text-primary-foreground shadow-lg shadow-primary/20 hover:scale-105 hover:shadow-xl hover:shadow-primary/30 active:scale-95'
+                  }
+            `}
+              >
+                {isProcessing ? (
+                  <>
+                    <span className="animate-spin">⏳</span>
+                    Processando... ({progress.current}/{progress.total})
+                  </>
+                ) : (
+                  <>
+                    🚀 Gerar CIs
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* Progress Bar */}
+            {isProcessing && (
+              <div className="bg-card border border-border rounded-xl shadow-lg p-4 mb-8 animate-in fade-in slide-in-from-bottom-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium">Progresso</span>
+                  <span className="text-sm text-muted-foreground">
+                    {progress.current} de {progress.total}
+                  </span>
+                </div>
+                <div className="w-full bg-secondary rounded-full h-3 overflow-hidden">
+                  <div
+                    className="bg-primary h-3 rounded-full transition-all duration-500 ease-out"
+                    style={{ width: `${(progress.current / progress.total) * 100}%` }}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Image Gallery */}
+            <div className="bg-card text-card-foreground rounded-2xl shadow-lg border border-border p-6 transition-all hover:shadow-xl mb-8">
+              <ImageGallery
+                images={generatedImages}
+                onDownloadAll={handleDownloadAll}
+              />
+
+              {generatedImages.length === 0 && !isProcessing && (
+                <div className="text-center py-16 text-muted-foreground">
+                  <div className="text-6xl mb-4 opacity-20">📋</div>
+                  <p className="text-lg">As CIs geradas aparecerão aqui</p>
+                </div>
+              )}
+            </div>
+
+            {/* Hidden preview container */}
+            <div ref={previewRef} className="hidden" />
+          </>
         )}
 
-        {/* Image Gallery */}
-        <div className="bg-card text-card-foreground rounded-2xl shadow-lg border border-border p-6 transition-all hover:shadow-xl">
-          <ImageGallery
-            images={generatedImages}
-            onDownloadAll={handleDownloadAll}
-          />
-
-          {generatedImages.length === 0 && !isProcessing && (
-            <div className="text-center py-16 text-muted-foreground">
-              <div className="text-6xl mb-4 opacity-20">📋</div>
-              <p className="text-lg">As CIs geradas aparecerão aqui</p>
-            </div>
-          )}
-        </div>
-
-        {/* Hidden preview container */}
-        <div ref={previewRef} className="hidden" />
+        {/* Tab Content: Atualizar Datas */}
+        {activeTab === 'datas' && (
+          <DateProcessor />
+        )}
       </main>
 
       {/* Footer */}
