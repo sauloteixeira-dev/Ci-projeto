@@ -4,25 +4,25 @@ import ImageGallery from './components/ImageGallery';
 import DateProcessor from './components/DateProcessor';
 import { readExcelFile, validateExcelData } from './utils/excelReader';
 import { htmlToImage, downloadImagesAsZip } from './utils/imageGenerator';
-import logoImg from './assets/logo.png';
+
 import './App.css';
 
-const DEFAULT_TEMPLATE = `C.I. N° <<NUMERO>>/AS/2026
+const DEFAULT_TEMPLATE = `Lorem N° <<NUMERO>>/DD/AAAA
 
-Para: Secretaria Municipal da Fazenda
-De: Secretaria de Assistência Social
-Assunto: Emissão do empenho (Auxilio – Aluguel)
+ipsum dolor: sit amet 
+sit: amet
+officiis: unde sed eveniet
 
-Prezado (a) Senhor (a),
+ Adipisicing Elit.
 
-Conforme documentação em anexo, solicitamos a V.S.ª emissão de empenho para pagamento de auxílio – aluguel em favor de <<NOME COMPLETO>>, no valor de R$ 400,00 (quatrocentos reais), referente ao período de <<DATA1>> a <<DATA2>>.
+Lorem ipsum dolor sit amet consectetur adipisicing elit. Accusantium vel, officiis unde sed eveniet, accusamus provident quas amet totam inventore velit voluptatem dolore tempore vitae odit perferendis! Aut, accusantium architecto.<<NOME COMPLETO>>,  officiis unde sed eveniet, accusamus provident ,consectetur adipisicing elit. Accusantium <<DATA1>> a <<DATA2>>.
 
-FAVOR EMPENHAR NA FICHA 212
+LOREM IPSUM DOLOR SIT
 
-Atenciosamente,
+ dolore tempore vitae,
 
-LARISSA ALVES DA SILVA VILELA
-Secretária Municipal de Assistência Social`;
+Lorem ipsum
+dolore tempore`;
 
 function App() {
   const [theme, setTheme] = useState('light');
@@ -39,6 +39,7 @@ function App() {
   const [progress, setProgress] = useState({ current: 0, total: 0 });
   const [error, setError] = useState(null);
   const [savedMessage, setSavedMessage] = useState(false);
+  const [showModal, setShowModal] = useState(true);
 
   const previewRef = useRef(null);
 
@@ -158,11 +159,11 @@ function App() {
             if (line.includes('C.I. N°')) {
               return `<p style="margin: 6px 0; text-align: justify; font-weight: bold;">${line}</p>`;
             }
-            // Linha de assinatura em negrito e centralizada
-            if (line.includes('LARISSA ALVES')) {
+            // Linha de assinatura em negrito e centralizada (linha antes de "Secretária")
+            if (line.trim() !== '' && line.trim() === line.trim().toUpperCase() && !line.includes('C.I.') && !line.includes('FAVOR EMPENHAR') && !line.includes('XXXX')) {
               return `<p style="font-weight: bold; margin: 2px 0; text-align: center;">${line}</p>`;
             }
-            if (line.includes('Secretária Municipal de Assistência Social')) {
+            if (line.includes('Secretária') || line.includes('Secretário')) {
               return `<p style="margin: 2px 0; text-align: center;">${line}</p>`;
             }
             // Atenciosamente
@@ -184,24 +185,13 @@ function App() {
 
         tempContainer.innerHTML = `
           <!-- Cabeçalho -->
-          <div style="text-align: center; padding: 40px ${sideMargin} 10px ${sideMargin}; border-bottom: none;">
-            <div style="display: flex; justify-content: center; margin-bottom: 10px;">
-              <img src="${logoImg}" style="width: 140px; height: auto;" />
-            </div>
-            <p style="font-weight: bold; font-size: 14pt; margin: 5px 0;">Prefeitura do Município de Alfenas</p>
-            <p style="font-size: 11pt; margin: 2px 0;">Secretaria Municipal de Assistência Social</p>
+          <div style="text-align: center; padding: 40px ${sideMargin} 20px ${sideMargin};">
+            <p style="font-size: 14pt; color: #999; font-style: italic; margin: 0;">SEU CABEÇALHO AQUI</p>
           </div>
           
           <!-- Corpo do documento -->
           <div style="flex: 1; padding: 20px ${sideMargin}; font-size: 12pt;">
             ${bodyContent}
-          </div>
-          
-          <!-- Rodapé -->
-          <div style="text-align: center; padding: 20px ${sideMargin} 30px ${sideMargin}; margin-top: auto;">
-            <p style="font-size: 10pt; margin: 2px 0;">Prefeitura Municipal de Alfenas</p>
-            <p style="font-size: 10pt; margin: 2px 0; color: #0066cc; text-decoration: underline;">www.alfenas.mg.gov.br</p>
-            <p style="font-size: 10pt; margin: 2px 0;">Tel.: 3698 1300</p>
           </div>
         `;
 
@@ -214,9 +204,10 @@ function App() {
         const blob = await htmlToImage(tempContainer);
         const url = URL.createObjectURL(blob);
         const sanitizedName = sanitizeFileName(record.nomeCompleto);
+        const ciNumber = formatCINumber(record.numero);
 
         images.push({
-          name: sanitizedName,
+          name: `${ciNumber} - ${sanitizedName}`,
           url,
           blob,
         });
@@ -261,13 +252,23 @@ function App() {
               Gere documentos oficiais com layout padronizado
             </p>
           </div>
-          <button
-            onClick={toggleTheme}
-            className="p-3 rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-all shadow-sm"
-            aria-label="Alternar tema"
-          >
-            {theme === 'light' ? '🌙' : '☀️'}
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setShowModal(true)}
+              className="p-3 rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-all shadow-sm"
+              aria-label="Formato do Excel"
+              title="Ver formato do Excel"
+            >
+              ❓
+            </button>
+            <button
+              onClick={toggleTheme}
+              className="p-3 rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-all shadow-sm"
+              aria-label="Alternar tema"
+            >
+              {theme === 'light' ? '🌙' : '☀️'}
+            </button>
+          </div>
         </div>
       </header>
 
@@ -474,6 +475,77 @@ function App() {
           </a>
         </div>
       </footer>
+
+      {/* Modal de Formato do Excel */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm transition-all duration-300">
+          <div className="bg-card text-card-foreground rounded-2xl shadow-xl border border-border w-full max-w-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between p-6 border-b border-border">
+              <h2 className="text-xl font-bold flex items-center gap-2 text-black dark:text-foreground">
+                📊 Formato esperado na Planilha
+              </h2>
+              <button
+                onClick={() => setShowModal(false)}
+                className="p-2 rounded-full hover:bg-secondary text-muted-foreground transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="p-6">
+              <p className="mb-4 text-sm text-black dark:text-muted-foreground">
+                Para que o sistema consiga ler os dados corretamente, seu arquivo Excel deve conter as colunas com os nomes exatos abaixo (na primeira linha):
+              </p>
+
+              <div className="overflow-x-auto rounded-xl border border-border">
+                <table className="w-full text-sm text-left">
+                  <thead className="text-xs uppercase bg-secondary text-secondary-foreground">
+                    <tr>
+                      <th className="px-4 py-3 font-bold border-r border-border">NUMERO</th>
+                      <th className="px-4 py-3 font-bold border-r border-border">NOME COMPLETO</th>
+                      <th className="px-4 py-3 font-bold border-r border-border">DATA1</th>
+                      <th className="px-4 py-3 font-bold">DATA2</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-background text-black dark:text-foreground">
+                    <tr className="border-b border-border">
+                      <td className="px-4 py-3 border-r border-border font-mono">01</td>
+                      <td className="px-4 py-3 border-r border-border font-medium">NOME COMPLETO1</td>
+                      <td className="px-4 py-3 border-r border-border font-mono">15/02</td>
+                      <td className="px-4 py-3 font-mono">14/03</td>
+                    </tr>
+                    <tr className="border-b border-border bg-secondary/30">
+                      <td className="px-4 py-3 border-r border-border font-mono">02</td>
+                      <td className="px-4 py-3 border-r border-border font-medium">NOME COMPLETO2</td>
+                      <td className="px-4 py-3 border-r border-border font-mono">01/02</td>
+                      <td className="px-4 py-3 font-mono">31/03</td>
+                    </tr>
+                    <tr>
+                      <td className="px-4 py-3 border-r border-border font-mono">03</td>
+                      <td className="px-4 py-3 border-r border-border font-medium">NOME COMPLETO3</td>
+                      <td className="px-4 py-3 border-r border-border font-mono">09/02</td>
+                      <td className="px-4 py-3 font-mono">08/03</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <p className="mt-4 text-xs text-muted-foreground italic">
+                * As colunas podem estar em qualquer ordem, e outras colunas extras serão ignoradas.
+              </p>
+            </div>
+
+            <div className="p-4 border-t border-border bg-secondary/30 flex justify-end">
+              <button
+                onClick={() => setShowModal(false)}
+                className="px-8 py-3 bg-primary text-primary-foreground rounded-xl font-bold hover:scale-105 active:scale-95 transition-all shadow-md flex items-center gap-2"
+              >
+                ✅ Entendi
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
